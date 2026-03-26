@@ -1,0 +1,16 @@
+name: cookie_jar
+version: 0.1.0
+
+authors:
+  - Anton Maminov <anton.maminov@gmail.com>
+
+description: |
+  Standalone HTTP cookie jar for Crystal stdlib HTTP types
+
+targets:
+  cookie_jar:
+    main: src/cookie_jar.cr
+
+crystal: ">= 1.2.0"
+
+license: MIT
