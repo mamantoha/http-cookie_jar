@@ -1,5 +1,9 @@
 # HTTP::CookieJar
 
+[![Crystal CI](https://github.com/mamantoha/http-cookie_jar/actions/workflows/crystal.yml/badge.svg)](https://github.com/mamantoha/http-cookie_jar/actions/workflows/crystal.yml)
+[![GitHub release](https://img.shields.io/github/release/mamantoha/http-cookie_jar.svg)](https://github.com/mamantoha/http-cookie_jar/releases)
+[![License](https://img.shields.io/github/license/mamantoha/http-cookie_jar.svg)](https://github.com/mamantoha/http-cookie_jar/blob/main/LICENSE)
+
 Standalone HTTP cookie jar for Crystal stdlib HTTP types.
 
 `HTTP::CookieJar` builds on top of:
