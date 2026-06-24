@@ -19,12 +19,8 @@ module HTTP
       end
 
       def normalize_cookie_path(path : String?, uri : URI) : String
-        if normalized_path = path
-          if normalized_path.starts_with?('/')
-            normalized_path
-          else
-            default_path(uri)
-          end
+        if path
+          path.starts_with?('/') ? path : default_path(uri)
         else
           default_path(uri)
         end
