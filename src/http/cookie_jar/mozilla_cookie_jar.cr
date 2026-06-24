@@ -44,7 +44,7 @@ module HTTP
     end
 
     private def serialize_expires(entry : Entry) : String
-      entry.expires_at ? entry.expires_at.not_nil!.to_unix.to_s : "0"
+      entry.expires_at.try(&.to_unix.to_s) || "0"
     end
 
     private def parse_entry(line : String) : Entry?

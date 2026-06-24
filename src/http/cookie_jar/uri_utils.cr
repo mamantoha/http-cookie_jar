@@ -19,12 +19,15 @@ module HTTP
       end
 
       def normalize_cookie_path(path : String?, uri : URI) : String
-        return default_path(uri) unless path.presence
-
-        normalized_path = path.not_nil!
-        return default_path(uri) unless normalized_path.starts_with?('/')
-
-        normalized_path
+        if normalized_path = path
+          if normalized_path.starts_with?('/')
+            normalized_path
+          else
+            default_path(uri)
+          end
+        else
+          default_path(uri)
+        end
       end
     end
   end
