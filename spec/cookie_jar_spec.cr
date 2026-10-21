@@ -211,4 +211,35 @@ describe HTTP::CookieJar do
 
     restored.cookies_for("https://example.com/account")["session_id"].value.should eq("abc123")
   end
+
+  it "blocks co.uk cookie injection when strict_domain is enabled" do
+    ["co.uk", ".Co.UK"].each do |domain|
+      jar = HTTP::CookieJar.new(policy: HTTP::DefaultCookiePolicy.new(strict_domain: true))
+      jar.extract(HTTP::Headers{"Set-Cookie" => "session=attacker; Domain=#{domain}; Path=/"},
+        "https://attacker.co.uk/")
+
+      jar.to_a.should be_empty
+      headers = HTTP::Headers.new
+      jar.add_cookie_header(headers, "https://victim.co.uk/")
+      headers["Cookie"]?.should be_nil
+    end
+  end
+
+  it "preserves parent-domain, host-only, path, and secure behavior in strict mode" do
+    jar = HTTP::CookieJar.new(policy: HTTP::DefaultCookiePolicy.new(strict_domain: true))
+    jar.extract(HTTP::Headers{"Set-Cookie" => [
+      "shared=valid; Domain=.Example.CO.UK; Path=/account; Secure",
+      "local=valid; Path=/",
+    ]}, "https://app.example.co.uk/account/login")
+
+    jar.cookies_for("https://app.example.co.uk/")["local"]?.should_not be_nil
+    jar.cookies_for("https://other.example.co.uk/account")["shared"]?.should_not be_nil
+    jar.cookies_for("https://other.example.co.uk/account")["local"]?.should be_nil
+    jar.cookies_for("http://other.example.co.uk/account")["shared"]?.should be_nil
+    jar.cookies_for("https://other.example.co.uk/accounting")["shared"]?.should be_nil
+
+    jar.add("https://co.uk/", HTTP::Cookie.new("host_only", "valid"))
+    jar.cookies_for("https://co.uk/")["host_only"]?.should_not be_nil
+    jar.cookies_for("https://child.co.uk/")["host_only"]?.should be_nil
+  end
 end

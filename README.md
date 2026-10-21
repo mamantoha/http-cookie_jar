@@ -283,9 +283,34 @@ Current policy behavior:
 - domain cookies may return to matching subdomains
 - domain cookies are rejected for IP hosts
 - low-quality domain attributes such as `com` are rejected
+- optional country-code second-level domain rejection (`strict_domain`)
 - path matching is enforced for returned cookies
 - secure cookies are only returned for secure schemes
 - empty request hosts are rejected
+
+### Strict domain policy
+
+Like [Python's `http.cookiejar.DefaultCookiePolicy`](https://docs.python.org/3/library/http.cookiejar.html#http.cookiejar.DefaultCookiePolicy.strict_domain), the default policy offers
+an optional `strict_domain` heuristic, disabled by default:
+
+```crystal
+policy = HTTP::DefaultCookiePolicy.new(strict_domain: true)
+jar = HTTP::CookieJar.new(policy: policy)
+```
+
+When enabled, it rejects two-label Domain attributes with a two-character final
+label and a common second-level label (for example, `co.uk`, `gov.uk`, or `co.nz`).
+Case and leading dots are normalized. These Domain attributes are also rejected
+when they equal the response host; host-only cookies remain supported.
+Valid parent-domain cookies such as `example.co.uk` remain supported.
+
+This is a limited heuristic, not Public Suffix List validation. It does not cover
+private suffixes such as `github.io`, wildcard rules, or exception rules, and may
+reject registrable domains that fit the pattern. The default remains permissive,
+so the `attacker.co.uk` to `victim.co.uk` injection remains possible unless strict
+mode is enabled. Like Python's option, this affects acceptance only; it does not
+revalidate cookies loaded from storage. No dependency, bundled list, Python
+installation, or network access is required.
 
 ## API
 

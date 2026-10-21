@@ -1,11 +1,12 @@
 module HTTP
   class DefaultCookiePolicy < CookiePolicy
-    getter allowed_domains, blocked_domains, secure_protocols
+    getter allowed_domains, blocked_domains, secure_protocols, strict_domain
 
     def initialize(
       @allowed_domains : Array(String)? = nil,
       @blocked_domains : Array(String) = [] of String,
       @secure_protocols : Array(String) = ["https", "wss"],
+      @strict_domain : Bool = false,
     )
     end
 
@@ -61,7 +62,17 @@ module HTTP
       return false if domain.empty?
       return false if ip_address?(domain)
 
+      return false if @strict_domain && country_code_second_level_domain?(domain)
+
       domain.includes?('.')
+    end
+
+    # Matches Python http.cookiejar's strict_domain heuristic, not the full PSL.
+    private def country_code_second_level_domain?(domain : String) : Bool
+      labels = domain.split('.')
+      return false unless labels.size == 2 && labels[1].size == 2
+
+      %w[co ac com edu org net gov mil int aero biz cat coop info jobs mobi museum name pro travel eu].includes?(labels[0])
     end
 
     private def path_match?(request_path : String, cookie_path : String) : Bool
